@@ -16,7 +16,7 @@ mIoU	IoU	mcIoU	                     Instrument Categories
 # Usage
 
 * Activate environment
-
+```
  $ conda activate /media/SSD0/aperezr20/anaconda3/envs/mask2former
 ```
 * Evaluation of the model on the val split
