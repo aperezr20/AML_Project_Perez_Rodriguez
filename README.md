@@ -10,7 +10,7 @@ Robust Mask2Former model on Endovis2018
 ```
 mIoU	IoU	mcIoU	                     Instrument Categories						
 				BF	PF	LND	VS/SI	GR/CA	MCS	UP
-82.96	78.69	48.07	85.01	37.53	46.14	64.23	0.00	93.47	10.10
+82.96	78.69	48.07	        85.01	37.53	46.14	64.23	0.00	93.47	10.10
 
 
 
