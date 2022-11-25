@@ -1,7 +1,5 @@
 # AML_Project_Perez_Rodriguez
 
-# Kvasir_Final_Project-perez-rodriguez
-
 ![resultados_cualitativo](https://github.com/IBIO4490/Kvasir_Final_Project-perez-rodriguez/blob/master/images/resultados_cualitativo.jpg)
 
 Robust Mask2Former model on Endovis2018
