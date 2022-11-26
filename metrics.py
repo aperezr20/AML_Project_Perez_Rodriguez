@@ -7,10 +7,50 @@ import matplotlib.pyplot as plt
 import torch
 import os
 import gc
+from matplotlib.colors import Normalize
 from copy import copy, deepcopy
 import json 
 import argparse
 
+def roundbox(box):
+    keys = box.split(' ')
+    keys = [str(round(float(k),4)) for k in keys]
+    return ' '.join(keys)
+
+def floatbox(box):
+    keys = box.split(' ')
+    return list(map(float,keys))
+
+def boxiou(bb1,bb2):
+    x1 = max(bb1[0],bb2[0])
+    y1 = max(bb1[1],bb2[1])
+    x2 = min(bb1[2],bb2[2])
+    y2 = min(bb1[3],bb2[3])
+    if x2<x1 or y2<y1:
+        return 0.0
+    inter = (x2-x1)*(y2-y1)
+    area1 = (bb1[2]-bb1[0])*(bb1[3]-bb1[1])
+    area2 = (bb2[2]-bb2[0])*(bb2[3]-bb2[1])
+    if (area1+area2-inter)==0:
+        breakpoint()
+    box_iou = inter/(area1+area2-inter)
+
+    assert box_iou>=0 and box_iou<=1
+    return box_iou
+
+def getrealbox(boxes,box):
+    maxiou = 0
+    realbox = ''
+    box = floatbox(box)
+    for box2 in boxes:
+        iou = boxiou(floatbox(box2),box)
+        if iou>maxiou:
+            maxiou=iou
+            realbox=box2
+    
+    assert maxiou>0.9 and maxiou<=1, 'Ugh ya ni se {}'.format(maxiou)
+    return realbox
+    
 def NMS(instances):
 
     all_masks = []
@@ -185,11 +225,110 @@ def eval_detection(preds,data,path):
 
     return total_gt_iou,total_iou,total_ciou,pcls_ious  
 
-'''m_path = '/media/SSD0/aperezr20/endovis/Mask2Former/output/EndoVis_2018/Delta_4'
-#m_path = '/media/SSD0/aperezr20/endovis/Mask2Former/output/EndoVis_2018/Delta_4/inference_soft_noise'
+def visualize(preds,data,path):
+    cats = {1,2,3,4,5,6,7}
 
-preds = torch.load(os.path.join(m_path,'inference','instances_predictions.pth'))
-data = json.load(open(os.path.join('/','media','SSD0','nayobi','All_datasets','coco_endovis_2018','annotations','instances_val2018_transformed.json')))
-path = os.path.join('semantic_ious.json')
+    file_dict ={}
+    file_name2id = {}
+    for d in data['images']:
+        file_name = d['file_name']
+        info = file_name.split('_')
+        sequence = '_'.join(info[:2])
+        file_name2id[d['id']] = file_name
 
-print(eval_detection(preds,data,path))'''
+        file_dict[file_name] = {'file_name': file_name, 'id': d['id'], 'instances': [], 'categories': [], 'video_name': sequence}
+    
+    data=None
+    gc.collect()
+    
+    # SwinS
+    thresh = {1: 0.65, 2: 0.84, 3: 0.007, 4: 0.94, 5: 0.1, 6: 0.005, 7: 0.0006}
+    class_inds = {1: 2, 2: 2, 3: 2, 4: 2, 5: 1, 6: 1, 7: 1}
+
+    for pred in tqdm(preds,desc='predictions'):
+        class_inss = {1:[], 2:[], 3:[], 4:[], 5:[], 6:[], 7:[]}
+        file_name = file_name2id[pred['image_id']]
+
+        categories = []
+        instances = []
+
+        for ins in pred['instances']:
+            if 'mask_embd' in ins:
+                del ins['mask_embd']
+            if 'decoder_out' in ins:
+                del ins['decoder_out']
+            if ins['score']>0.0:
+                ins['category_id'] += 1
+                # instances.append(ins)
+                class_inss[ins['category_id']].append(ins)
+        
+        for cat in class_inss:
+            this_list = class_inss[cat]
+            this_list.sort(reverse=True,key= lambda x: x['score'])
+            if len(this_list)>0:
+                th = thresh[cat]
+                max_ind = class_inds[cat]
+                instances.extend([u for u in this_list[:max_ind] if u['score']>=th])            
+
+        instances.sort(key=lambda x: x['score'])
+
+        file_dict[file_name]['instances'] = instances
+        file_dict[file_name]['categories'] = set(categories)
+
+    preds = None
+    instances = None
+    gc.collect()
+
+    seq, frame = path.split(',')
+    file = 'seq_{}_frame{}.png'.format(seq, frame)
+
+    try:
+        os.makedirs(os.path.join('Visualizations_RMATIS_Demo'),exist_ok=True)
+        img = io.imread(os.path.join('/','media','SSD0','nayobi','All_datasets','coco_endovis_2018','val2018',file))
+        gt_img = io.imread(os.path.join('/','media','SSD0','nayobi','All_datasets','coco_endovis_2018','annotations','instances_val2018',file)).astype('float')
+    except:
+        assert False, 'File ' + file + ' does not exist, try another. Sequence must exist and the frame number must have 3 digits (i.e: for frame 1 use 001).'
+
+    gt_img[gt_img==6]=4
+    gt_img[gt_img==8]=5
+    gt_img[gt_img==9]=6
+
+    gt_classes = set(np.unique(gt_img))
+    gt_classes.remove(0)
+
+    sem_im = np.zeros((1024,1280))
+    for ins in file_dict[file]['instances']: #instances:
+        p_mask = m.decode(ins['segmentation'])
+        sem_im[p_mask==1]=ins['category_id']
+
+    fig, axs = plt.subplots(1, 3, constrained_layout=True)
+
+    cmap = plt.cm.Set1.copy()
+    cmap.set_bad(color='black')
+
+    gt_img[gt_img==0] = 'nan'
+
+    sem_im = sem_im.astype('float')
+    sem_im[sem_im==0] = 'nan'
+
+    axs[0].imshow(img)
+    axs[0].axis('off')
+    axs[0].set_title('Original Image')
+
+    axs[1].imshow(sem_im, cmap=cmap,norm=Normalize(1,7))
+    axs[1].axis('off')
+    axs[1].set_title('RMATIS')
+
+    axs[2].imshow(gt_img,cmap=cmap,norm=Normalize(1,7))
+    axs[2].axis('off')
+    axs[2].set_title('GroundTruth')
+    
+    plt.axis('off')
+
+    plt.savefig(os.path.join('Visualizations_RMATIS_Demo', file))
+    plt.close()        
+
+    gc.collect()
+
+
+    gc.collect()
