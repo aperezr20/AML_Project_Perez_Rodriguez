@@ -2,9 +2,10 @@
 
 Robust Mask2Former model on Endovis2018
 <p align="center">
-	<img width="960" height="518" src="https://github.com/aperezr20/AML_Project_Perez_Rodriguez/blob/main/Segmentation%20Examples.png">
+	<img width="980" height="518" src="https://github.com/aperezr20/AML_Project_Perez_Rodriguez/blob/main/Segmentation%20Examples.png">
 </p>
 
+Some qualitative results are shown in this repo, where the color that corresponds to each class is shown in the figure above.
 
 * Quantitatively, our model achieves the following metrics on Endovis2018:
 
