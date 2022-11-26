@@ -30,6 +30,6 @@ mIoU	IoU	mcIoU	                     Instrument Categories
  $ python main.py --mode demo --img img_file_name
  
 ```
-	In order to visualize an image, the img_file_name must be the number of the sequence and the number of the frame separated by a comma. For example, to 		visualize the segmentation of image seq_2_frame100.png, run command:
+* In order to visualize an image, the img_file_name must be the number of the sequence and the number of the frame separated by a comma. For example, to 		visualize the segmentation of image seq_2_frame100.png, run command:
 ```
 									 $ python main.py --mode demo --img 2,100
