@@ -2,7 +2,7 @@
 
 Robust Mask2Former model on Endovis2018
 <p align="center">
-	<img width="530" height="455" src="https://github.com/aperezr20/AML_Project_Perez_Rodriguez/blob/main/Segmentation%20Examples.png">
+	<img width="960" height="518" src="https://github.com/aperezr20/AML_Project_Perez_Rodriguez/blob/main/Segmentation%20Examples.png">
 </p>
 
 
