@@ -2,10 +2,9 @@
 
 Robust Mask2Former model on Endovis2018
 <p align="center">
-	<img width="460" height="300" src="https://github.com/aperezr20/AML_Project_Perez_Rodriguez/blob/main/Segmentation%20Examples.png">
+	<img width="530" height="455" src="https://github.com/aperezr20/AML_Project_Perez_Rodriguez/blob/main/Segmentation%20Examples.png">
 </p>
-![Qualitative Results](https://github.com/aperezr20/AML_Project_Perez_Rodriguez/blob/main/Segmentation%20Examples.png)
-# Results on the val split
+
 
 * Quantitatively, our model achieves the following metrics on Endovis2018:
 
