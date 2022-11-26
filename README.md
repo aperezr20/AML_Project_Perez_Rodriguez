@@ -27,7 +27,7 @@ mIoU	IoU	mcIoU	                     Instrument Categories
  
 ```
 
-* Model predictions of an image from the test split
+* Model predictions of an image from the test split (segmentation will be saved in a folder called 'Visualizations_RMATIS_Demo' at main level)
 ```
  $ python main.py --mode demo --img img_file_name
  
