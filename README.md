@@ -2,7 +2,7 @@
 
 Robust Mask2Former model on Endovis2018
 
-!(https://github.com/aperezr20/AML_Project_Perez_Rodriguez/blob/main/Segmentation%20Examples.png)
+![Qualitative Results](https://github.com/aperezr20/AML_Project_Perez_Rodriguez/blob/main/Segmentation%20Examples.png)
 
 # Results on the val split
 
